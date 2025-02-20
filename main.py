@@ -10,12 +10,7 @@ load_dotenv()
 DEFAULT_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Default OpenAI settings
-MODEL_OPTIONS = [
-    "gpt-4",
-    "gpt-4o",
-    "gpt-4o-mini",
-    "gpt-3.5-turbo",
-]
+MODEL_OPTIONS = ["gpt-4", "gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", "Custom"]
 DEFAULT_MODEL = "gpt-4"
 DEFAULT_PROMPT = os.getenv("SYSTEM_PROMPT", "You are a helpful assistant.")
 DEFAULT_TEMPERATURE = 0.7
@@ -46,7 +41,14 @@ st.sidebar.title("⚙️ ChatGPT Settings")
 api_key = st.sidebar.text_input(
     "🔑 OpenAI API Key", type="password", value=DEFAULT_API_KEY
 )
-model = st.sidebar.selectbox("🧠 Model", MODEL_OPTIONS, index=0)
+selected_model = st.sidebar.selectbox("🧠 Model", MODEL_OPTIONS, index=0)
+
+# Allow manual model entry if "Custom" is selected
+if selected_model == "Custom":
+    model = st.sidebar.text_input("✍️ Enter Custom Model Name")
+else:
+    model = selected_model
+
 system_prompt = st.sidebar.text_area("💡 System Prompt", DEFAULT_PROMPT, height=100)
 temperature = st.sidebar.slider("🌡️ Temperature", 0.0, 1.0, DEFAULT_TEMPERATURE, 0.1)
 max_tokens = st.sidebar.slider("🔢 Max Tokens", 50, 4096, DEFAULT_MAX_TOKENS, 50)
@@ -69,6 +71,8 @@ user_message = st.text_area(
 if st.button("🚀 Send"):
     if not api_key:
         st.error("⚠️ Please provide a valid OpenAI API Key!")
+    elif not model:
+        st.error("⚠️ Please enter a valid model name!")
     else:
         try:
             client = openai.OpenAI(api_key=api_key)
